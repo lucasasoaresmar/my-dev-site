@@ -14,6 +14,12 @@ sections:
     name: Single Responsability
   - link: open-closed
     name: Open Closed
+  - link: liskovs-substitution
+    name: Liskov's Substitution
+  - link: interface-segregation
+    name: Interface Segregation
+  - link: dependency-inversion
+    name: Dependency Inversion
 ---
 
 ```javascript
@@ -207,7 +213,7 @@ Entidades devem ser abertas para extensão mas fechadas para modificação.
 
 Isso quer dizer que uma classe **deve ser extensível** sem que seja necessário modificá-la.
 
-Por Exemplo: Nós precisamos criar a descrição de uma casa para venda:
+Por exemplo: Nós precisamos criar a descrição de uma casa para venda:
 
 **Errado:**
 
@@ -443,6 +449,745 @@ namespace ocp
 
       logger.Log(house);
       logger.Log(car);
+    }
+  }
+}
+
+```
+
+<a name="liskovs-substitution"></a>
+
+## Liskov's Substitution
+
+Filho de peixe, peixinho é! 🐟🐟🐟
+
+Objetos podem ser substituitos pelas instâncias dos seus subtipos sem alterar a funcionalidade do programa.
+
+Por exemplo: Um peixe pode nadar e comer mas o Nemo também pode falar.
+
+**Errado:**
+
+```javascript
+
+class Fish {
+  // Coisas de peixe
+}
+
+class Nemo extends Fish {
+  talk() {
+    return "Estou perdido :(";
+  }
+}
+
+const nemo = new Nemo();
+const fish = new Fish();
+
+console.log(nemo.talk());
+// Estou perdido :(
+console.log(fish.talk());
+
+```
+
+```go
+
+package main
+
+import (
+	"fmt"
+)
+
+type Fish struct {
+	// Coisas de peixe
+}
+
+type Nemo struct {
+	Fish
+}
+
+func (nm *Nemo) Talk() string {
+	return "Estou perdido :("
+}
+
+func main() {
+	fish := Fish{}
+	nemo := Nemo{}
+
+	fmt.Println(nemo.Talk())
+	// Estou perdido :(
+	fmt.Println(fish.Talk())
+	// Erro
+}
+
+```
+
+```csharp
+
+using System;
+
+namespace todo
+{
+
+  class Program
+  {
+    
+    public class Fish
+    {
+      // Coisas de peixe
+    }
+
+    public class Nemo : Fish
+    {
+      public string Talk()
+      {
+        return "Estou perdido :(";
+      }
+    }
+
+    static void Main(string[] args)
+    {
+      Fish fish = new Fish();
+      Nemo nemo = new Nemo();
+
+      Console.WriteLine(nemo.Talk());
+      // Estou perdido :(
+      Console.WriteLine(fish.Talk());
+      // Erro
+    }
+  }
+}
+
+```
+
+Só que ao tentar fazer um peixe qualquer falar, teremos um erro pois a definição de falar não existe para peixe.
+
+Poderiamos implementar "Talk" no peixe normal e retornar "", afinal não falar nada também é uma forma de falar. Mas isso seria um comportamento bem esquisito para quem estivesse lendo esse código.
+
+A solução pode ser usar composição, ou apenas definir os comportamentos em interfaces.
+
+**Certo:**
+
+```javascript
+
+const fishThings = () => ({
+  // Coisas de peixe
+});
+
+const canTalk = () => ({
+  talk: () => "Estou perdido :(",
+});
+
+function Fish() {
+  return Object.freeze({
+    ...fishThings(),
+  });
+}
+
+function Nemo() {
+  return Object.freeze({
+    ...fishThings(),
+    ...canTalk(),
+  });
+}
+
+const nemo = Nemo();
+const fish = Fish();
+
+console.log(nemo.talk());
+// Estou perdido :(
+
+```
+
+```go
+
+package main
+
+import (
+	"fmt"
+)
+
+type FishBehavior struct {
+	// Coisas de peixe
+}
+
+type TalkBehavior struct{}
+
+type Fish struct {
+	FishBehavior
+}
+
+type Nemo struct {
+	FishBehavior
+	TalkBehavior
+}
+
+func (tb *TalkBehavior) Talk() string {
+	return "Estou perdido :("
+}
+
+func main() {
+	nemo := Nemo{}
+
+	fmt.Println(nemo.Talk())
+	// Estou perdido :(
+}
+
+```
+
+```csharp
+
+using System;
+
+namespace todo
+{
+
+  class Program
+  {
+    interface IFish
+    {
+      // Coisas de peixe
+    }
+
+    interface ITalk
+    {
+      string Talk();
+    }
+
+    public class Fish : IFish
+    {
+      // Peixe implementa IFish
+    }
+
+    public class Nemo : IFish, ITalk
+    {
+      public string Talk()
+      {
+        return "Estou perdido :(";
+      }
+    }
+
+    static void Main(string[] args)
+    {
+      Nemo nemo = new Nemo();
+      Console.WriteLine(nemo.Talk());
+      // Estou perdido :(
+    }
+  }
+}
+
+```
+
+<a name="interface-segregation"></a>
+
+## Interface Segregation
+
+Não obrigue suas entidades a terem coisas que elas não vão usar.
+
+Por exemplo: Ao fazer um jogo, você pode criar um aventureiro como uma interface base para as suas outras classes. Entre as habilidade de um aventureiro estão roubar e soltar uma bola de fogo.
+
+```javascript
+
+function Adventurer() {
+  function fireball() {
+    console.log("Fireball!");
+  }
+
+  function steal() {
+    console.log("Roubando!");
+  }
+
+  return Object.freeze({
+    fireball,
+    steal,
+  });
+}
+
+const gandalf = Adventurer();
+const bilbo = Adventurer();
+
+gandalf.fireball();
+// Fireball!
+
+bilbo.steal();
+// Roubando!
+
+```
+
+```go
+
+package main
+
+import (
+	"fmt"
+)
+
+type Adventurer interface {
+	Fireball()
+	Steal()
+}
+
+type Mage struct{}
+
+func (mg *Mage) Fireball() {
+	fmt.Println("Fireball!")
+}
+
+func (mg *Mage) Steal() {
+	fmt.Println("Não posso roubar")
+}
+
+type Burgler struct{}
+
+func (bg *Burgler) Fireball() {
+	fmt.Println("Não posso fazer magia")
+}
+
+func (bg *Burgler) Steal() {
+	fmt.Println("Roubando!")
+}
+
+func main() {
+	gandalf := Mage{}
+	bilbo := Burgler{}
+
+	gandalf.Fireball()
+	// Fireball!
+
+	bilbo.Steal()
+	// Roubando!
+}
+
+```
+
+```csharp
+
+using System;
+
+namespace todo
+{
+  class Program
+  {
+    interface IAdventurer
+    {
+      void Fireball();
+      void Steal();
+    }
+
+    class Mage : IAdventurer
+    {
+      public void Fireball()
+      {
+        Console.WriteLine("Fireball!");
+      }
+      public void Steal()
+      {
+        throw new NotImplementedException();
+      }
+    }
+
+    class Burgler : IAdventurer
+    {
+      public void Fireball()
+      {
+        throw new NotImplementedException();
+      }
+      public void Steal()
+      {
+        Console.WriteLine("Stealing!");
+      }
+    }
+
+    static void Main(string[] args)
+    {
+      Mage gandalf = new Mage();
+      Burgler bilbo = new Burgler();
+
+      gandalf.Fireball();
+      // Fireball!
+
+      bilbo.Steal();
+      // Stealing!
+    }
+  }
+}
+
+```
+
+O problema é que um ladrão comum não solta bolas de fogo, e nem um mago rouba ninguém. Então basta separar essas habilidades de acordo com quem é responsável por elas.
+
+```javascript
+
+const canSteal = () => ({
+  steal: () => console.log("Roubando!"),
+});
+
+const canFireball = () => ({
+  fireball: () => console.log("Fireball"),
+});
+
+function Mage() {
+  return Object.freeze({
+    ...canFireball(),
+  });
+}
+
+function Burgler() {
+  return Object.freeze({
+    ...canSteal(),
+  });
+}
+
+const gandalf = Mage();
+const bilbo = Burgler();
+
+gandalf.fireball();
+// Fireball!
+
+bilbo.steal();
+// Roubando!
+
+```
+
+```go
+
+package main
+
+import (
+	"fmt"
+)
+
+type Sorcerer interface {
+	Fireball()
+}
+
+type Stealer interface {
+	Steal()
+}
+
+type Mage struct{}
+
+type Burgler struct{}
+
+func (mg *Mage) Fireball() {
+	fmt.Println("Fireball!")
+}
+
+func (bg *Burgler) Steal() {
+	fmt.Println("Roubando!")
+}
+
+func main() {
+	gandalf := Mage{}
+	bilbo := Burgler{}
+
+	gandalf.Fireball()
+	// Fireball!
+
+	bilbo.Steal()
+	// Roubando!
+}
+
+```
+
+```csharp
+
+using System;
+
+namespace todo
+{
+  class Program
+  {
+    interface IBurgler
+    {
+      void Steal();
+    }
+
+    interface IMage
+    {
+      void Fireball();
+    }
+
+    class Mage : IMage
+    {
+      public void Fireball()
+      {
+        Console.WriteLine("Fireball!");
+      }
+    }
+
+    class Burgler : IBurgler
+    {
+      public void Steal()
+      {
+        Console.WriteLine("Stealing!");
+      }
+    }
+
+    static void Main(string[] args)
+    {
+      Mage gandalf = new Mage();
+      Burgler bilbo = new Burgler();
+
+      gandalf.Fireball();
+      // Fireball!
+
+      bilbo.Steal();
+      // Stealing!
+    }
+  }
+}
+
+```
+
+<a name="dependency-inversion"></a>
+
+## Dependency Inversion
+
+Seus objetos devem depender de abstrações, não de casos concretos. 👻
+
+Por exemplo: Eu quero ver quanto de dinheiro eu tenho na minha carteira.
+
+```javascript
+
+function Wallet() {
+  return Object.freeze({
+    money: () => console.log("R$100,00"),
+  });
+}
+
+function Person() {
+  const state = {
+    wallet: Wallet(),
+  };
+
+  return Object.freeze({
+    checkMoney: () => state.wallet.money(),
+  });
+}
+
+const me = Person();
+me.checkMoney();
+// R$100,00
+
+```
+
+```go
+
+package main
+
+import (
+	"fmt"
+)
+
+type Wallet struct{}
+
+type Person struct {
+	Wallet *Wallet
+}
+
+func (wl *Wallet) Money() {
+	fmt.Println("R$100,00")
+}
+
+func (per *Person) CheckMoney() {
+	per.Wallet.Money()
+}
+
+func main() {
+	me := Person{}
+
+	me.CheckMoney()
+	// R$100,00
+}
+
+```
+
+```csharp
+
+using System;
+
+namespace di
+{
+  class Program
+  {
+
+    class Wallet
+    {
+      public void Money()
+      {
+        Console.WriteLine("R$100,00");
+      }
+    }
+
+    class Person
+    {
+      public Wallet Wallet { get; }
+      public Person()
+      {
+        Wallet = new Wallet();
+      }
+
+      public void CheckMoney()
+      {
+        Wallet.Money();
+      }
+    }
+
+    static void Main(string[] args)
+    {
+      Person me = new Person();
+      me.CheckMoney();
+      // R$100,00
+    }
+  }
+}
+
+```
+
+Mas se eu quiser ver o quanto de dinheiro eu tenho na minha conta vou ter um problema, porque eu apenas conheço a minha carteira.
+
+```javascript
+
+const canKeepMoney = ({ amount }) => ({
+  money: () => console.log(amount),
+});
+
+function MoneyKeeper({ amount = "R$100,00" } = {}) {
+  return Object.freeze({
+    ...canKeepMoney({ amount }),
+  });
+}
+
+function Person({ moneyKeeper } = {}) {
+  const state = {
+    moneyKeeper,
+  };
+
+  return Object.freeze({
+    checkMoney: () => state.moneyKeeper.money(),
+    setMoneyKeeper: (moneyKeeper) => (state.moneyKeeper = moneyKeeper),
+  });
+}
+
+const wallet = MoneyKeeper();
+const bankAccount = MoneyKeeper({ amount: "R$300,00" });
+
+const me = Person({ moneyKeeper: wallet });
+me.checkMoney();
+// R$100,00
+
+me.setMoneyKeeper(bankAccount);
+me.checkMoney();
+// R$300,00
+
+```
+
+```go
+
+package main
+
+import (
+	"fmt"
+)
+
+type MoneyKeeper interface {
+	Money()
+}
+
+type Wallet struct{}
+
+type BankAccount struct{}
+
+type Person struct {
+	MoneyKeeper MoneyKeeper
+}
+
+func (wl *Wallet) Money() {
+	fmt.Println("R$100,00")
+}
+
+func (ba *BankAccount) Money() {
+	fmt.Println("R$300,00")
+}
+
+func (per *Person) CheckMoney() {
+	per.MoneyKeeper.Money()
+}
+
+func (per *Person) SetMoneyKeeper(moneyKeeper MoneyKeeper) {
+	per.MoneyKeeper = moneyKeeper
+}
+
+func main() {
+	wallet := Wallet{}
+	bankAccount := BankAccount{}
+	me := Person{&wallet}
+
+	me.CheckMoney()
+	// R$100,00
+
+	me.SetMoneyKeeper(&bankAccount)
+	me.CheckMoney()
+	// R$300,00
+}
+
+```
+
+```csharp
+
+using System;
+
+namespace di
+{
+  class Program
+  {
+
+    interface IMoneyKeeper
+    {
+      void Money();
+    }
+
+    class Wallet : IMoneyKeeper
+    {
+      public void Money()
+      {
+        Console.WriteLine("R$100,00");
+      }
+    }
+
+    class BankAccount : IMoneyKeeper
+    {
+      public void Money()
+      {
+        Console.WriteLine("R$300,00");
+      }
+    }
+
+    class Person
+    {
+      public IMoneyKeeper MoneyKeeper { get; set; }
+      public Person(IMoneyKeeper moneyKeeper)
+      {
+        MoneyKeeper = moneyKeeper;
+      }
+
+      public void CheckMoney()
+      {
+        MoneyKeeper.Money();
+      }
+    }
+
+    static void Main(string[] args)
+    {
+      Wallet wallet = new Wallet();
+      BankAccount bankAccount = new BankAccount();
+
+      Person me = new Person(wallet);
+      me.CheckMoney();
+      // R$100,00
+
+      me.MoneyKeeper = bankAccount;
+      me.CheckMoney();
+      // R$300,00
     }
   }
 }
