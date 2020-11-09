@@ -44,6 +44,8 @@ Console.WriteLine("Csharp is rock SOLID!");
 
 ## Single Responsability
 
+> Você só é responsável pelas suas ações.
+
 Uma classe deve fazer apenas uma coisa e ter apenas uma razão para mudar. É só isso mesmo.
 
 Por exemplo: Temos uma vaca 🐄 que diz "Muuuuuu". Essa vaca não tem obrigação de saber onde queremos que esse "Muuuuuu" apareça, pois isso não é responsabilidade dela.
@@ -113,7 +115,10 @@ namespace srp
 
 ```
 
-**Certo:**
+**Certo**
+
+Para não obrigar a vaga a gritar no console, criamos alguém para fazer isso por ela:
+
 ```javascript
 
 function Cow() {
@@ -208,6 +213,8 @@ namespace srp
 <a name="open-closed"></a>
 
 ## Open Closed
+
+> Time que está ganhando não se mexe
 
 Entidades devem ser abertas para extensão mas fechadas para modificação.
 
@@ -314,13 +321,13 @@ namespace ocp
 
 ```
 
+**Certo:**
+
 Mas aí descobrimos que além da casa vamos precisar fazer a descrição de um carro também. O problema é que nosso código está esperando uma casa e não um carro. 
 
 Podemos mudar nosso Logger e acrescentar uma função de logar descrição do carro, mas aí teriamos que mexer em código que já está funcionando.
 
 A solução é deixar nosso Logger ser **extensível** a outros items:
-
-**Certo:**
 
 ```javascript
 
@@ -459,7 +466,7 @@ namespace ocp
 
 ## Liskov's Substitution
 
-Filho de peixe, peixinho é! 🐟🐟🐟
+> Filho de peixe, peixinho é! 🐟🐟🐟
 
 Objetos podem ser substituitos pelas instâncias dos seus subtipos sem alterar a funcionalidade do programa.
 
@@ -524,7 +531,7 @@ func main() {
 
 using System;
 
-namespace todo
+namespace ls
 {
 
   class Program
@@ -558,13 +565,13 @@ namespace todo
 
 ```
 
+**Certo:**
+
 Só que ao tentar fazer um peixe qualquer falar, teremos um erro pois a definição de falar não existe para peixe.
 
 Poderiamos implementar "Talk" no peixe normal e retornar "", afinal não falar nada também é uma forma de falar. Mas isso seria um comportamento bem esquisito para quem estivesse lendo esse código.
 
 A solução pode ser usar composição, ou apenas definir os comportamentos em interfaces.
-
-**Certo:**
 
 ```javascript
 
@@ -637,7 +644,7 @@ func main() {
 
 using System;
 
-namespace todo
+namespace ls
 {
 
   class Program
@@ -680,9 +687,13 @@ namespace todo
 
 ## Interface Segregation
 
+> Leve apenas o que precisar
+
 Não obrigue suas entidades a terem coisas que elas não vão usar.
 
-Por exemplo: Ao fazer um jogo, você pode criar um aventureiro como uma interface base para as suas outras classes. Entre as habilidade de um aventureiro estão roubar e soltar uma bola de fogo.
+Por exemplo: Ao fazer um jogo, você pode criar um aventureiro base para as suas outras classes. Entre as habilidade de um aventureiro estão roubar e soltar uma bola de fogo.
+
+**Errado:**
 
 ```javascript
 
@@ -762,7 +773,7 @@ func main() {
 
 using System;
 
-namespace todo
+namespace is
 {
   class Program
   {
@@ -811,6 +822,8 @@ namespace todo
 }
 
 ```
+
+**Certo:**
 
 O problema é que um ladrão comum não solta bolas de fogo, e nem um mago rouba ninguém. Então basta separar essas habilidades de acordo com quem é responsável por elas.
 
@@ -892,7 +905,7 @@ func main() {
 
 using System;
 
-namespace todo
+namespace is
 {
   class Program
   {
@@ -942,9 +955,13 @@ namespace todo
 
 ## Dependency Inversion
 
+> Não se defina pelo que você tem
+
 Seus objetos devem depender de abstrações, não de casos concretos. 👻
 
 Por exemplo: Eu quero ver quanto de dinheiro eu tenho na minha carteira.
+
+**Errado:**
 
 ```javascript
 
@@ -1042,6 +1059,8 @@ namespace di
 }
 
 ```
+
+**Certo:**
 
 Mas se eu quiser ver o quanto de dinheiro eu tenho na minha conta vou ter um problema, porque eu apenas conheço a minha carteira.
 
