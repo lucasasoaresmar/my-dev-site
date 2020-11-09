@@ -134,6 +134,17 @@ export const base = {
       borderRadius: "5px",
       padding: "0.75rem",
     },
+    blockquote: {
+      borderLeft: "6px solid",
+      borderLeftColor: "muted",
+      margin: "1.5em 10px",
+      padding: "0.5em 10px",
+      "& > p": {
+        display: "inline",
+        fontStyle: "italic",
+        fontWeight: "200",
+      },
+    },
     table: {
       width: "100%",
       borderCollapse: "separate",
