@@ -10,4 +10,8 @@ Javascript:
 Csharp:
   value: Csharp
   color: green
+
+Just Code:
+  value: Just Code
+  color: violet
 ---
